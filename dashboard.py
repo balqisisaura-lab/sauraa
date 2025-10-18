@@ -1,61 +1,41 @@
-import streamlit as st
-from ultralytics import YOLO
-import tensorflow as tf
+import os
 import numpy as np
-from PIL import Image
+import tensorflow as tf
+from tensorflow import keras
+from tensorflow.keras import layers
 
-# ==========================
-# Load Models
-# ==========================
-@st.cache_resource
-def load_models():
-    # Pastikan nama file model tanpa spasi ya!
-    yolo_model = YOLO("model/Balqis Isaura_Laporan 4.pt")  # Model deteksi objek
-    classifier = tf.keras.models.load_model("model/Balqis Isaura_Laporan2.h5")  # Model klasifikasi
-    return yolo_model, classifier
+# 1. Pastikan versi library aman
+print("TensorFlow version:", tf.__version__)
+print("Keras version:", keras.__version__)
 
-yolo_model, classifier = load_models()
+# 2. Set default dtype yang valid
+tf.keras.backend.set_floatx('float32')
 
-# ==========================
-# UI
-# ==========================
-st.title("🧠 Image Classification & Object Detection App")
+# 3. Jika kamu punya model lama atau pretrained, hapus atau re-train saja
+# Misal modelnya bernama model, pastikan semua layer pakai dtype yang valid
+def build_model(input_shape):
+    inputs = keras.Input(shape=input_shape, dtype='float32')  # jangan tuple!
+    x = layers.Dense(64, activation='relu')(inputs)
+    x = layers.Dense(32, activation='relu')(x)
+    outputs = layers.Dense(1, activation='sigmoid')(x)
+    model = keras.Model(inputs, outputs)
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    return model
 
-menu = st.sidebar.selectbox("Pilih Mode:", ["Deteksi Objek (YOLO)", "Klasifikasi Gambar"])
-uploaded_file = st.file_uploader("Unggah Gambar", type=["jpg", "jpeg", "png"])
+# 4. Contoh data dummy untuk uji coba
+X_train = np.random.rand(100, 10).astype('float32')
+y_train = np.random.randint(0, 2, size=(100, 1)).astype('float32')
 
-if uploaded_file is not None:
-    # Buka dan tampilkan gambar
-    img = Image.open(uploaded_file)
-    st.image(img, caption="Gambar yang Diupload", use_container_width=True)
+# 5. Bangun dan latih model
+model = build_model((10,))
+model.fit(X_train, y_train, epochs=3, batch_size=8)
 
-    # ==========================
-    # MODE 1: Deteksi Objek (YOLO)
-    # ==========================
-    if menu == "Deteksi Objek (YOLO)":
-        results = yolo_model(img)
-        result_img = results[0].plot()
-        st.image(result_img, caption="Hasil Deteksi", use_container_width=True)
+# 6. Simpan model (opsional)
+model.save("model_safe.keras")
 
-    # ==========================
-    # MODE 2: Klasifikasi Gambar (TensorFlow)
-    # ==========================
-    elif menu == "Klasifikasi Gambar":
-        # --- Preprocessing ---
-        img = img.convert("RGB")                       # pastikan format RGB
-        img_resized = img.resize((224, 224))           # sesuaikan dengan input model
-        img_array = np.asarray(img_resized, dtype=np.float32) / 255.0
-        img_array = np.expand_dims(img_array, axis=0)  # tambahkan batch dimension
+# 7. Jika kamu jalankan ini di dashboard.py, pastikan tidak ada variabel Keras
+#    yang punya dtype tuple, misalnya:
+#    ❌ salah: keras.Variable((1, 2), dtype=(tf.float32, tf.int32))
+#    ✅ benar: keras.Variable([1.0, 2.0], dtype='float32')
 
-        # --- Antisipasi bug dtype tuple ---
-        if isinstance(img_array, tuple):
-            img_array = np.array(img_array[0], dtype=np.float32)
-
-        # --- Prediksi ---
-        prediction = classifier.predict(img_array)
-        class_index = int(np.argmax(prediction))
-        probability = float(np.max(prediction))
-
-        # --- Output ke UI ---
-        st.write("### 🧩 Hasil Prediksi:", class_index)
-        st.write("Probabilitas:", f"{probability:.4f}")
+print("✅ Model berhasil dijalankan tanpa error dtype tuple!")
