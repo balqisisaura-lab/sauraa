@@ -1,6 +1,6 @@
-streamlit
-tensorflow==2.17.0
-ultralytics
-pillow
-opencv-python-headless
+streamlit==1.50.0
+tensorflow==2.20.0
+keras==3.4.1
 numpy
+pandas
+matplotlib
