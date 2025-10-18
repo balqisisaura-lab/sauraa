@@ -10,8 +10,8 @@ from PIL import Image
 @st.cache_resource
 def load_models():
     # Pastikan nama file model tanpa spasi ya!
-    yolo_model = YOLO("model/Balqis_Isaura_Laporan4.pt")  # Model deteksi objek
-    classifier = tf.keras.models.load_model("model/Balqis_Isaura_Laporan2.h5")  # Model klasifikasi
+    yolo_model = YOLO("model/Balqis Isaura_Laporan 4.pt")  # Model deteksi objek
+    classifier = tf.keras.models.load_model("model/Balqis Isaura_Laporan2.h5")  # Model klasifikasi
     return yolo_model, classifier
 
 yolo_model, classifier = load_models()
