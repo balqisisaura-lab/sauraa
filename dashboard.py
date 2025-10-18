@@ -6,8 +6,8 @@ from PIL import Image
 
 @st.cache_resource
 def load_models():
-    yolo_model = YOLO("model/Balqis_Isaura_Laporan4.pt")
-    classifier = tf.keras.models.load_model("model/Balqis_Isaura_Laporan2.h5")
+    yolo_model = YOLO("model/Balqis Isaura_Laporan 4.pt")
+    classifier = tf.keras.models.load_model("model/Balqis Isaura_Laporan2.h5")
     return yolo_model, classifier
 
 yolo_model, classifier = load_models()
