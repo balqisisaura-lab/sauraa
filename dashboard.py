@@ -13,7 +13,7 @@ import cv2
 def load_models():
     yolo_model = YOLO("model/Balqis Isaura_Laporan 4.pt")  # Model deteksi objek
     classifier = tf.keras.models.load_model("model/Balqis Isaura_Laporan2.h5")  # Model klasifikasi
-    return yolo, clf
+    return yolo_model, classifier
 
 yolo_model, classifier = load_models()
 
